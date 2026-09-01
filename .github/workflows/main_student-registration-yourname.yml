@@ -1,7 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy ASP app to Azure Web App - student-registration-yourname
+name: Deploy HTML to Azure Web App - student-registration-yourname
 
 on:
   push:
@@ -10,57 +7,27 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: windows-latest
-    permissions:
-      contents: read #This is required for actions/checkout
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup MSBuild path
-        uses: microsoft/setup-msbuild@v1.0.2
-
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1.0.5
-
-      - name: Restore NuGet packages
-        run: nuget restore
-
-      - name: Publish to folder
-        run: msbuild /nologo /verbosity:m /t:Build /t:pipelinePreDeployCopyAllFilesToOneFolder /p:_PackageTempDir="\published\"
-
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
-        with:
-          name: ASP-app
-          path: '/published/**'
-
   deploy:
     runs-on: windows-latest
-    needs: build
+
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: ASP-app
-      
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C48CA1EA1A4A4F5D9E3C7ED8C26137B4 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C48CA1EA1A4F5D9E3C7ED8C26137B4 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_13745DB295BE40E0A4E2E264087A3971 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_044E3DD8391C43C49AD9AF0B6A4F73D7 }}
 
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
+      - name: Deploy HTML to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'student-registration-yourname'
           slot-name: 'Production'
           package: .
-          
